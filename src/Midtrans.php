@@ -6,49 +6,51 @@ use Exception;
 
 class Midtrans {
 
-	private $serverKeyProduction;
-	private $serverKeySandbox;
 	private $isProduction;
 	private $curlOptions;
 
-	private $sandboxBaseUrl;
-	private $productionBaseUrl;
-	private $snapSanboxBaseUrl;
-	private $productionSanboxBaseUrl;
+	private $serverKeySandbox;
+	private $baseUrlSandbox;
+	private $snapBaseUrlSandbox;
+	
+	private $serverKeyProduction;
+	private $baseUrlProduction;
+	private $snapBaseUrlProduction;
 
     public function __construct()
     {
-    	$this->serverKeySandbox = env('SERVER_KEY_SANDBOX');
-    	$this->serverKeyProduction = env('SERVER_KEY_PRODUCTION');
-    	$this->isProduction = env('IS_PRODUCTION');
-    	$this->curlOptions = array();
+		$this->isProduction = env('MIDTRANS_IS_PRODUCTION');
+		$this->curlOptions  = array();
+    	
+		$this->serverKeySandbox   = env('MIDTRANS_SERVER_KEY_SANDBOX');
+		$this->baseUrlSandbox     = env('MIDTRANS_BASE_URL_SANDBOX');
+		$this->snapBaseUrlSandbox = env('MIDTRANS_SNAP_BASE_URL_SANDBOX');
 
-    	$this->sandboxBaseUrl = env('SANDBOX_BASE_URL');
-    	$this->productionBaseUrl = env('PRODUCTION_BASE_URL');
-    	$this->snapSanboxBaseUrl = env('SNAP_SANDBOX_BASE_URL');
-    	$this->productionSanboxBaseUrl = env('SNAP_PRODUCTION_BASE_URL');
+		$this->serverKeyProduction   = env('MIDTRANS_SERVER_KEY_PRODUCTION');
+		$this->baseUrlProduction     = env('MIDTRANS_BASE_URL_PRODUCTION');
+		$this->snapBaseUrlProduction = env('MIDTRANS_SNAP_BASE_URL_PRODUCTION');
     }
 
     public function config($params)
     {
-        $this->serverKeyProduction = $params['server_key_production'];
-        $this->serverKeySandbox = $params['server_key_sandbox'];
-        $this->isProduction = $params['production'];
+		$this->serverKeyProduction = $params['server_key_production'];
+		$this->serverKeySandbox    = $params['server_key_sandbox'];
+		$this->isProduction        = $params['production'];
     }
 
     private function getServerKey()
     {
       	return $this->isProduction ? $this->serverKeyProduction : $this->serverKeySandbox;
-    } 
+    }
 
     private function getBaseUrl()
     {
-      	return $this->isProduction ? $this->productionBaseUrl : $this->sandboxBaseUrl;
-    }   
+      	return $this->isProduction ? $this->baseUrlProduction : $this->baseUrlSandbox;
+    }
 
     private function getSnapBaseUrl()
     {
-      	return $this->isProduction ? $this->productionSanboxBaseUrl : $this->snapSanboxBaseUrl;
+      	return $this->isProduction ? $this->snapBaseUrlProduction : $this->snapBaseUrlSandbox;
     }
 
     public function get($url, $server_key, $data_hash)
@@ -62,7 +64,7 @@ class Midtrans {
  	}
 
   	private function remoteCall($url, $server_key, $data_hash, $post = true)
-    { 
+    {
       	$ch = curl_init();
       	$curl_options = array(
         	CURLOPT_URL => $url,
